@@ -1,48 +1,67 @@
 /* ===== 网络测速仪 · 样式 ===== */
 :root {
-  --bg: #f1f5f9;
-  --card: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --chip: #f1f5f9;
-  --accent: #3b82f6;
-  --accent-strong: #2563eb;
-  --ok: #10b981;
-  --warn: #f59e0b;
-  --err: #ef4444;
-  --hero1: #0f172a;
-  --hero2: #1e293b;
-  --shadow: 0 10px 30px -12px rgba(15, 23, 42, .18);
+  /* 暖色调（浅色）：奶油底 + 陶土橙 */
+  --bg: #fdf4e8;
+  --card: #fffcf7;
+  --text: #40291a;
+  --muted: #97795f;
+  --border: #f0ddc4;
+  --chip: #fbf0e0;
+  --accent: #e07a3f;
+  --accent-strong: #c55f26;
+  --ok: #5f9c5a;
+  --warn: #d98b1f;
+  --err: #d2503c;
+  --hero1: #6b3618;
+  --hero2: #b0552a;
+  --hero-text: #fff6ec;
+  --glow1: rgba(224, 122, 63, .16);
+  --glow2: rgba(217, 139, 31, .12);
+  --chart-fill: rgba(224, 122, 63, .16);
+  --shadow: 0 10px 30px -12px rgba(107, 54, 24, .22);
   --radius: 16px;
 }
 
 html[data-theme="dark"] {
-  --bg: #0b1220;
-  --card: #111827;
-  --text: #e2e8f0;
-  --muted: #94a3b8;
-  --border: #243044;
-  --chip: #1f2937;
-  --accent: #60a5fa;
-  --accent-strong: #3b82f6;
-  --hero1: #0f172a;
-  --hero2: #111827;
+  --bg: #1c1512;
+  --card: #272019;
+  --text: #f4e6d7;
+  --muted: #bb9c82;
+  --border: #42352b;
+  --chip: #33291f;
+  --accent: #f0a35e;
+  --accent-strong: #e08b3e;
+  --ok: #8cc084;
+  --warn: #e5a445;
+  --err: #e8775f;
+  --hero1: #3a2314;
+  --hero2: #6b3a1d;
+  --hero-text: #ffeeda;
+  --glow1: rgba(240, 163, 94, .10);
+  --glow2: rgba(224, 139, 62, .08);
+  --chart-fill: rgba(240, 163, 94, .18);
   --shadow: 0 10px 30px -12px rgba(0, 0, 0, .6);
 }
 
 @media (prefers-color-scheme: dark) {
   html[data-theme="auto"] {
-    --bg: #0b1220;
-    --card: #111827;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --border: #243044;
-    --chip: #1f2937;
-    --accent: #60a5fa;
-    --accent-strong: #3b82f6;
-    --hero1: #0f172a;
-    --hero2: #111827;
+    --bg: #1c1512;
+    --card: #272019;
+    --text: #f4e6d7;
+    --muted: #bb9c82;
+    --border: #42352b;
+    --chip: #33291f;
+    --accent: #f0a35e;
+    --accent-strong: #e08b3e;
+    --ok: #8cc084;
+    --warn: #e5a445;
+    --err: #e8775f;
+    --hero1: #3a2314;
+    --hero2: #6b3a1d;
+    --hero-text: #ffeeda;
+    --glow1: rgba(240, 163, 94, .10);
+    --glow2: rgba(224, 139, 62, .08);
+    --chart-fill: rgba(240, 163, 94, .18);
     --shadow: 0 10px 30px -12px rgba(0, 0, 0, .6);
   }
 }
@@ -51,7 +70,11 @@ html[data-theme="dark"] {
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(1000px 520px at 12% -8%, var(--glow1), transparent 62%),
+    radial-gradient(760px 420px at 100% 2%, var(--glow2), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
   line-height: 1.6;
@@ -63,15 +86,15 @@ body {
 /* ---------- 顶部 ---------- */
 .hero {
   background: linear-gradient(135deg, var(--hero1) 0%, var(--hero2) 100%);
-  color: #f8fafc;
+  color: var(--hero-text);
   border-radius: 22px;
   padding: 24px 26px;
   box-shadow: var(--shadow);
 }
 .hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .hero h1 { margin: 6px 0 4px; font-size: 1.7rem; letter-spacing: .5px; }
-.hero .sub { margin: 0; color: #cbd5e1; font-size: .92rem; }
-.back { color: #93c5fd; text-decoration: none; font-size: .85rem; }
+.hero .sub { margin: 0; color: rgba(255, 246, 236, .78); font-size: .92rem; }
+.back { color: #ffd7a8; text-decoration: none; font-size: .85rem; }
 .back:hover { text-decoration: underline; }
 
 .overview {
@@ -91,7 +114,7 @@ body {
   gap: 2px;
   min-width: 0;
 }
-.ov-label { font-size: .74rem; color: #cbd5e1; letter-spacing: .4px; }
+.ov-label { font-size: .74rem; color: rgba(255, 246, 236, .8); letter-spacing: .4px; }
 .ov-value {
   font-family: "Cascadia Code", "Fira Code", ui-monospace, monospace;
   font-size: .95rem;
@@ -152,13 +175,13 @@ textarea {
   line-height: 1.6;
 }
 html[data-theme="dark"] textarea,
-html[data-theme="auto"] textarea { background: #0f172a; }
-@media (prefers-color-scheme: dark) { html[data-theme="auto"] textarea { background: #0f172a; } }
+html[data-theme="auto"] textarea { background: #2b1f16; }
+@media (prefers-color-scheme: dark) { html[data-theme="auto"] textarea { background: #2b1f16; } }
 
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, .18);
+  box-shadow: 0 0 0 3px rgba(224, 122, 63, .22);
 }
 
 .presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
@@ -214,7 +237,7 @@ input:focus, select:focus, textarea:focus {
 .icon-btn {
   background: rgba(255, 255, 255, .12);
   border: 1px solid rgba(255, 255, 255, .18);
-  color: #f8fafc;
+  color: var(--hero-text);
   border-radius: 12px;
   width: 40px;
   height: 40px;

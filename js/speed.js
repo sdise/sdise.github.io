@@ -91,7 +91,7 @@
 
   function cssVar(n, fallback) {
     const v = getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-    return v || fallback || '#3b82f6';
+    return v || fallback || '#e07a3f';
   }
   function unitLabel() { return state.unit === 'mbs' ? '速度 (MB/s)' : '速度 (Mbps)'; }
   function convertPoint(mbps) { return state.unit === 'mbs' ? mbps * 1e6 / 8 / MB : mbps; }
@@ -125,9 +125,10 @@
     if (!canvas) return;
     if (chartInst) { chartInst.destroy(); chartInst = null; }
     if (window.Chart) {
-      const accent = cssVar('--accent', '#3b82f6');
-      const grid = cssVar('--border', '#e2e8f0');
-      const text = cssVar('--muted', '#64748b');
+      const accent = cssVar('--accent', '#e07a3f');
+      const grid = cssVar('--border', '#f0ddc4');
+      const text = cssVar('--muted', '#97795f');
+      const fill = cssVar('--chart-fill', 'rgba(224,122,63,.16)');
       chartInst = new window.Chart(canvas.getContext('2d'), {
         type: 'line',
         data: {
@@ -136,7 +137,7 @@
             label: unitLabel(),
             data: series.data.map(convertPoint),
             borderColor: accent,
-            backgroundColor: 'rgba(59,130,246,.16)',
+            backgroundColor: fill,
             borderWidth: 2.5, tension: 0.28, fill: true, pointRadius: 0
           }]
         },
@@ -194,8 +195,8 @@
     max = max > 0 ? max * 1.15 : 10;
 
     ctx.font = '11px system-ui';
-    ctx.fillStyle = cssVar('--muted', '#64748b');
-    ctx.strokeStyle = cssVar('--border', '#e2e8f0');
+    ctx.fillStyle = cssVar('--muted', '#97795f');
+    ctx.strokeStyle = cssVar('--border', '#f0ddc4');
     ctx.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
       const y = pad.t + ih - (ih * i / 4);
@@ -213,13 +214,13 @@
       const y = pad.t + ih - (data[i] / max) * ih;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
-    ctx.strokeStyle = cssVar('--accent', '#3b82f6');
+    ctx.strokeStyle = cssVar('--accent', '#e07a3f');
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.lineTo(pad.l + iw, pad.t + ih);
     ctx.lineTo(pad.l, pad.t + ih);
     ctx.closePath();
-    ctx.fillStyle = 'rgba(59,130,246,.15)';
+    ctx.fillStyle = cssVar('--chart-fill', 'rgba(224,122,63,.15)');
     ctx.fill();
     ctx.fillStyle = cssVar('--muted', '#64748b');
     ctx.fillText('0 s', pad.l, h - 8);
