@@ -25,6 +25,10 @@
 
   
     
+<link rel="stylesheet" href="/css/projects.css">
+
+  
+    
 <link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
 
   
@@ -51,6 +55,10 @@
         
           <a class="main-nav-link" href="/archives">Archives</a>
         
+          <a class="main-nav-link" href="/projects/">项目</a>
+        
+          <a class="main-nav-link" href="/speed.html">测速</a>
+        
       </nav>
       <nav id="sub-nav">
         
@@ -68,6 +76,46 @@
 
       <div class="outer">
         <section id="main">
+  
+    <article id="page-projects" class="article article-type-page">
+  <div class="article-inner">
+    <header class="article-header">
+      <h1 class="article-title"><a href="/projects/">开源项目</a></h1>
+    </header>
+    <div class="article-entry">
+      <p>我维护的几个 <strong>Cloudflare Workers</strong> 小项目，都是单文件、零依赖，可以直接粘贴到控制台部署。</p>
+
+      <div class="proj-grid">
+        <div class="proj-card">
+          <h3><a href="/projects/cf-b2-worker/">cf-b2-worker</a></h3>
+          <p>Cloudflare Workers ⇄ Backblaze B2 一体化网关：自带 AWS SigV4 实现与网页文件管理器，读写闭环、预签名直传、分片上传；CF 与 B2 同属带宽联盟，回源与出网双向免流量费。</p>
+          <div class="tag-row">
+            <span class="tag">Workers</span>
+            <span class="tag">Backblaze B2</span>
+            <span class="tag">SigV4</span>
+            <span class="tag green">零依赖</span>
+          </div>
+          <div class="proj-meta">对比重写了 CF-Proxy-B2 与 cw4b2：去掉 cron 与 CF API Token，读写闭环并默认安全</div>
+        </div>
+
+        <div class="proj-card">
+          <h3><a href="/projects/cf-vpngate/">cf-vpngate</a></h3>
+          <p>前端 VLESS over WebSocket / XHTTP，后端可走 SSTP（VPN Gate 公共节点）、ProxyIP、socks5、http(s) 或 TXT 记录随机落地；SSTP 分支在 Worker 内完成 PPP 协商并手工封装 IPv4/TCP。</p>
+          <div class="tag-row">
+            <span class="tag">VLESS</span>
+            <span class="tag">XHTTP</span>
+            <span class="tag">SSTP / PPP</span>
+            <span class="tag amber">协议研究</span>
+          </div>
+          <div class="proj-meta">按上游 snippet.js 重构：14 个分区、CONFIG 集中配置、DoH 缓存、BYOB 读、上下行攒包与背压</div>
+        </div>
+      </div>
+
+      <p>另外做了一个 <a href="/speed.html"><strong>网络测速仪</strong></a>：纯前端的延迟 / 抖动 / 下载 / 上传测速与链路诊断，打开即用。</p>
+    </div>
+  </div>
+</article>
+
   
     <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
@@ -136,6 +184,19 @@
   
     
   <div class="widget-wrap">
+    <h3 class="widget-title">项目</h3>
+    <div class="widget">
+      <ul>
+        <li><a href="/projects/cf-b2-worker/">cf-b2-worker</a></li>
+        <li><a href="/projects/cf-vpngate/">cf-vpngate</a></li>
+        <li><a href="/speed.html">网络测速仪</a></li>
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
     <h3 class="widget-title">Archiv</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">十二月 2024</a></li></ul>
@@ -179,6 +240,10 @@
     <a href="/" class="mobile-nav-link">Home</a>
   
     <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/projects/" class="mobile-nav-link">项目</a>
+  
+    <a href="/speed.html" class="mobile-nav-link">测速</a>
   
 </nav>
     

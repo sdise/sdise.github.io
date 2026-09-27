@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>cf-vpngate：VLESS 入站 + SSTP / ProxyIP 落地的 Cloudflare Worker | blog</title>
+  <meta name="description" content="前端 VLESS over WebSocket / XHTTP，后端可走 SSTP（VPN Gate 公共节点）、ProxyIP、socks5、http(s) 或 TXT 记录随机落地；SSTP 分支在 Worker 内完成 PPP 协商与 IPv4/TCP 手工封装。">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="cf-vpngate：VLESS 入站 + SSTP / ProxyIP 落地的 Cloudflare Worker">
+  <meta property="og:url" content="https://sdise.github.io/projects/cf-vpngate/">
+  <meta property="og:site_name" content="blog">
+  <meta property="og:description" content="按上游 snippet.js 重构的协议实验项目：14 个分区、CONFIG 集中配置、DoH 缓存、BYOB 读、上下行攒包与背压、UDP(53) 转 TCP DNS。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="article:author" content="len">
+  <meta name="twitter:card" content="summary">
+  <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/projects.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">blog</a>
+      </h1>
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        <a class="main-nav-link" href="/">Home</a>
+        <a class="main-nav-link" href="/archives">Archives</a>
+        <a class="main-nav-link" href="/projects/">项目</a>
+        <a class="main-nav-link" href="/speed.html">测速</a>
+      </nav>
+      <nav id="sub-nav">
+        <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        <a class="nav-icon nav-search-btn" title="Suche"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Suche"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://sdise.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main">
+  <article class="article article-type-page">
+    <div class="article-inner">
+      <header class="article-header">
+        <h1 class="article-title">cf-vpngate</h1>
+        <p style="color:#888;margin:.4em 0 0;">前端 VLESS over WebSocket / XHTTP，后端 SSTP（VPN Gate）+ ProxyIP 落地</p>
+      </header>
+      <div class="article-entry">
+
+        <p><strong>一句话概括</strong>：这不是普通的「WebSocket → connect() → 目标」字节转发。当后端走 SSTP 时，Worker 会在脚本里完成 <strong>SSTP 建链 → PPP（LCP / PAP / IPCP）协商 → 拿到虚拟 IPv4 → 手工封装 IPv4/TCP</strong>，再与目标通信。</p>
+
+        <p>
+          <a class="btn-link" href="https://github.com/sdise/cf-vpngate" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a class="btn-link ghost" href="https://github.com/jacobax/snippets" target="_blank" rel="noopener">上游 jacobax/snippets</a>
+          <a class="btn-link ghost" href="/projects/">← 返回项目列表</a>
+        </p>
+
+        <div class="tag-row">
+          <span class="tag">VLESS</span>
+          <span class="tag">WebSocket</span>
+          <span class="tag">XHTTP</span>
+          <span class="tag">SSTP / PPP</span>
+          <span class="tag">ProxyIP</span>
+          <span class="tag amber">协议研究 · 学习性质</span>
+        </div>
+
+        <div class="callout">
+          <p>这是<strong>协议研究与学习性质</strong>的代码，不是稳定可用的 VPN 客户端，不做任何可用性承诺。请遵守所在地法律法规与 Cloudflare 服务条款，仅用于协议学习与合法的网络访问。</p>
+        </div>
+
+        <h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2>
+        <pre><code>客户端 (v2rayN / Xray / sing-box ...)
+   │  VLESS over WebSocket  或  VLESS over XHTTP
+   ▼
+Cloudflare Worker  ── 本仓库
+   │
+   ├─ 直连（默认优先）：connect(目标)
+   │
+   └─ 落地（proxyip / SSTP / socks5 / http(s)）：
+        ├─ ProxyIP         → connect(proxyip:443)，由它按 SNI 反代到目标
+        ├─ SSTP            → SSTP over TLS → PPP → 虚拟 IPv4 → 手工 TCP → 目标
+        ├─ socks5 / http(s) → CONNECT 目标
+        └─ 域名!txt         → 取 TXT 记录里的任意一种地址，随机选一个
+   ▼
+目标网站 / 目标服务器</code></pre>
+
+        <p>SSTP 后端的完整链路：</p>
+        <pre><code>VLESS over WS/XHTTP
+  → Cloudflare Worker
+  → SSTP over TLS (SSTP_DUPLEX_POST)
+  → PPP：LCP → PAP → IPCP
+  → PPP 分配的虚拟 IPv4
+  → 手工 IPv4 + TCP 封包（SYN / ACK / PSH / FIN、序号、窗口、校验和）
+  → 目标 TCP 服务</code></pre>
+
+        <h2 id="这次重构做了什么"><a href="#这次重构做了什么" class="headerlink" title="这次重构做了什么"></a>这次重构做了什么</h2>
+        <table>
+          <thead><tr><th>项目</th><th>旧版 CF-SoftEther</th><th>重构后 cf-vpngate</th></tr></thead>
+          <tbody>
+            <tr><td>入站</td><td>仅 VLESS over WebSocket</td><td>WS + XHTTP（含 Early Data）</td></tr>
+            <tr><td>后端</td><td>仅 SSTP（path 里写死 <code>sstp://</code>）</td><td>SSTP + ProxyIP + !txt + socks5 + http(s) 统一调度</td></tr>
+            <tr><td>DNS</td><td>每次请求都打 DoH</td><td>DoH 结果缓存 3 分钟 + 同域名并发去重</td></tr>
+            <tr><td>上行</td><td>逐条 <code>write</code></td><td>分片入队 + 出队合并，队列 8MB 上限，带反压</td></tr>
+            <tr><td>下行</td><td>逐块 <code>ws.send</code></td><td>攒包到 64KB + <code>bufferedAmount</code> 背压感知 + <code>scheduler.wait</code> 让出</td></tr>
+            <tr><td>读取方式</td><td>默认 reader</td><td>优先 BYOB（零拷贝）读</td></tr>
+            <tr><td>半关闭</td><td>无</td><td><code>allowHalfOpen</code>，正确收发 FIN</td></tr>
+            <tr><td>UDP</td><td>不支持</td><td>53 端口（DNS）转成 TCP 上的 DNS 查询再回写</td></tr>
+            <tr><td>代码结构</td><td>一个函数流、缩写变量</td><td>14 个分区、命名函数、<code>CONFIG</code> 集中配置、异常统一收口</td></tr>
+            <tr><td>部署形态</td><td>只能当 Worker</td><td>Worker（wrangler）与 Snippets（粘贴）都能用</td></tr>
+          </tbody>
+        </table>
+        <p>冲突处理原则：<strong>凡是与上游 <code>snippet.js</code> 行为不一致的地方，以上游为准</strong>（握手超时、early data 来源、<code>!txt</code> 处理顺序、xhttp 响应头、UDP/53 方案等）。</p>
+
+        <h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2>
+        <pre><code># 方式一：Wrangler（推荐，可保留 wrangler.toml）
+npm i
+npx wrangler login
+npm run deploy          # 等价于 wrangler deploy
+
+# 方式二：Dashboard 新建 Worker
+新建 Worker → 快速编辑 → 粘贴 worker.js 全文 → 保存并部署 → 绑定自定义域
+
+# 方式三：Cloudflare Snippets
+规则 → Snippets → 新建 → 粘贴 worker.js 全文 → 部署</code></pre>
+        <p>Snippets 没有环境变量，改 UUID 直接在文件顶部改 <code>CONFIG.uuid</code>，或写全局变量 <code>UUID = "..."</code>。若出现 1101，删掉旧片段 / 旧 Worker 后重新部署。</p>
+
+        <h2 id="路径与参数"><a href="#路径与参数" class="headerlink" title="路径与参数"></a>路径与参数</h2>
+        <pre><code>/fdip=&lt;落地地址&gt;?ed=2560[&amp;global=1][&amp;auto=1]</code></pre>
+        <ul>
+          <li><code>fdip</code>：键名可任意（<code>proxy</code>、<code>p</code>、<code>1234</code> 都行），值就是落地地址；</li>
+          <li><code>ed=2560</code>：Early Data，客户端侧参数，<strong>放最后</strong>；</li>
+          <li><code>global=1</code>：强制走落地（默认先尝试直连，失败再回落）；</li>
+          <li><code>auto=1</code> / <code>auto=2</code>：自适应 proxyip。</li>
+        </ul>
+
+        <table>
+          <thead><tr><th>写法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td><code>1.2.3.4:443</code>、<code>[2001:db8::1]:443</code></td><td>ProxyIP 直连</td></tr>
+            <tr><td><code>proxy.example.com</code></td><td>ProxyIP 直连（默认 443）</td></tr>
+            <tr><td><code>sub.example.com!txt</code></td><td>取该域名 TXT 记录里的一条地址（逗号 / 换行分隔，随机选）</td></tr>
+            <tr><td><code>sstp://host:443</code></td><td>SSTP（VPN Gate / SoftEther），默认 <code>vpn:vpn</code></td></tr>
+            <tr><td><code>sstp://user:pass@host:443</code></td><td>自定义 PAP 认证的 SSTP</td></tr>
+            <tr><td><code>socks5://host:1080</code></td><td>SOCKS5 落地</td></tr>
+            <tr><td><code>http://host:8080</code>、<code>https://host:443</code></td><td>HTTP CONNECT 落地</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2>
+        <p>所有可调项集中在 <code>worker.js</code> 顶部的 <code>CONFIG</code>：</p>
+        <table>
+          <thead><tr><th>字段</th><th>默认值</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><code>uuid</code></td><td><code>495c7195-…</code></td><td>VLESS UUID，可用 Worker 变量 <code>UUID</code> 覆盖</td></tr>
+            <tr><td><code>proxyip</code></td><td><code>proxyip.example.com!txt</code></td><td>默认落地</td></tr>
+            <tr><td><code>autoDomain</code></td><td><code>proxy.zjcloud.us.ci</code></td><td><code>auto=1/2</code> 时的自适应域名模板</td></tr>
+            <tr><td><code>race</code></td><td><code>1</code></td><td>直连并发拨号数，&gt;1 时取最快的一条并关掉其余</td></tr>
+            <tr><td><code>chunk</code></td><td><code>65536</code></td><td>socket → WebSocket 读块大小</td></tr>
+            <tr><td><code>dnPack / dnTail / dnMs</code></td><td><code>65536 / 2048 / 2</code></td><td>下行攒包上限、剩余阈值、延迟冲刷毫秒</td></tr>
+            <tr><td><code>upPack</code></td><td><code>65536</code></td><td>上行入队分片大小</td></tr>
+            <tr><td><code>maxED</code></td><td><code>8192</code></td><td>Early Data 最大长度</td></tr>
+            <tr><td><code>mss</code></td><td><code>1400</code></td><td>SSTP 隧道内 TCP 分片（<strong>不要超过 1400</strong>）</td></tr>
+            <tr><td><code>sstpUser / sstpPass</code></td><td><code>vpn / vpn</code></td><td>PPP 的 PAP 认证</td></tr>
+            <tr><td><code>dnsServer / dnsPort</code></td><td><code>1.1.1.1 / 53</code></td><td>UDP(53) 转发的 TCP DNS 服务器</td></tr>
+            <tr><td><code>debug</code></td><td><code>false</code></td><td>打开后输出 <code>[cf-vpngate]</code> 前缀日志，配合 <code>wrangler tail</code></td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="自助节点页-sub"><a href="#自助节点页-sub" class="headerlink" title="自助节点页 /sub"></a>自助节点页 /sub</h2>
+        <pre><code>curl https://your-worker.example.com/sub
+curl https://your-worker.example.com/sub?sstp=sstp://vpn1234.opengw.net:443
+curl https://your-worker.example.com/sub?proxy=1.2.3.4:443</code></pre>
+        <p>返回纯文本：ws 链接、xhttp 链接、可直接复制的 xhttp extra，自动使用请求的 <code>Host</code>。其它任何非代理请求一律返回 <code>204</code>，不暴露页面。</p>
+
+        <h2 id="UDP-53"><a href="#UDP-53" class="headerlink" title="UDP(53)"></a>UDP(53)</h2>
+        <p>VLESS 的 UDP 只处理 <strong>53 端口（DNS）</strong>：Worker 把 DNS 查询包通过 TCP 发给 <code>1.1.1.1:53</code>，拿到带长度前缀的应答后原样回写给客户端（Worker 环境无原生 UDP 出站，其它 UDP 目标直接断开）。</p>
+
+        <h2 id="限制与已知问题"><a href="#限制与已知问题" class="headerlink" title="限制与已知问题"></a>限制与已知问题</h2>
+        <ul>
+          <li>SSTP 后端只模拟必要的 IPv4/TCP 路径，<strong>不是完整网络栈</strong>——SACK、窗口缩放等 TCP 选项未实现；</li>
+          <li>只适合 TCP 目标，UDP 仅 53；</li>
+          <li>兼容性取决于 SSTP/SoftEther 服务端行为（不同版本对 IPCP、PAP 的处理有差异）；</li>
+          <li>大流量、长连接会受 Workers 运行时限制（CPU 时间、内存、并发连接数）；</li>
+          <li>VPN Gate 公共节点随时可能下线，需要自行维护列表（优先选 443 端口）；</li>
+          <li><code>mss</code> 不要改大：TCP 伪首部缓冲区固定 1432 字节（12 + 20 + 1400）。</li>
+        </ul>
+
+        <h2 id="排障"><a href="#排障" class="headerlink" title="排障"></a>排障</h2>
+        <table>
+          <thead><tr><th>现象</th><th>排查</th></tr></thead>
+          <tbody>
+            <tr><td>1101</td><td>删除旧 Worker / 旧片段后重新部署</td></tr>
+            <tr><td>连不上（ws）</td><td>确认 <code>Upgrade: websocket</code>、path 中的 UUID 与 <code>CONFIG.uuid</code> 一致</td></tr>
+            <tr><td>xhttp 无响应</td><td>确认 <code>type=xhttp</code>、<code>mode=stream-one</code>、<code>Content-Type: application/octet-stream</code></td></tr>
+            <tr><td>SSTP 落地失败</td><td>换节点、确认 443 端口、<code>wrangler tail</code> 看是否卡在 PPP；把 <code>CONFIG.debug</code> 设为 <code>true</code></td></tr>
+            <tr><td>目标被重置</td><td>试 <code>global=1</code> 强制走落地，或换 ProxyIP / 换 SSTP 节点</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="许可与鸣谢"><a href="#许可与鸣谢" class="headerlink" title="许可与鸣谢"></a>许可与鸣谢</h2>
+        <ul>
+          <li>许可：GPL-3.0</li>
+          <li>上游实现与对齐基准：<a href="https://github.com/jacobax/snippets" target="_blank" rel="noopener">jacobax/snippets</a>（<code>snippet.js</code>）</li>
+          <li>SoftEther VPN / VPN Gate（筑波大学维护的公共 VPN 中继项目，节点由志愿者提供，列表实时变化）</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+</section>
+
+        <aside id="sidebar">
+  <div class="widget-wrap">
+    <h3 class="widget-title">项目</h3>
+    <div class="widget">
+      <ul>
+        <li><a href="/projects/cf-b2-worker/">cf-b2-worker</a></li>
+        <li><a href="/projects/cf-vpngate/">cf-vpngate</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="widget-wrap">
+    <h3 class="widget-title">工具</h3>
+    <div class="widget">
+      <ul>
+        <li><a href="/speed.html">网络测速仪</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">十二月 2024</a></li></ul>
+    </div>
+  </div>
+</aside>
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2026 len<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  <a href="/" class="mobile-nav-link">Home</a>
+  <a href="/archives" class="mobile-nav-link">Archives</a>
+  <a href="/projects/" class="mobile-nav-link">项目</a>
+  <a href="/speed.html" class="mobile-nav-link">测速</a>
+</nav>
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
