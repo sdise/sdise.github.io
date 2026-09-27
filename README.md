@@ -33,8 +33,6 @@
   <https://github.com/sdise/web_speed>
 - **cf-b2** — 暂无描述
   <https://github.com/sdise/cf-b2>
-- **vpngate-test** — Cloudflare Worker：VPNGate 节点 SSTP 在线检测 + VLESS 链接转换（带 Web 界面）
-  <https://github.com/sdise/vpngate-test>
 
 ## 网络测速仪
 
