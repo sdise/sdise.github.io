@@ -31,7 +31,7 @@
   <https://github.com/sdise/proxypool>
 - **web_speed** — 暂无描述
   <https://github.com/sdise/web_speed>
-- **cf-b2** — 暂无描述
+- **cf-b2** — Cloudflare Workers ⇄ Backblaze B2 一体化网关：单文件、零依赖，自带 AWS Signature V4 实现和网页文件管理器
   <https://github.com/sdise/cf-b2>
 
 ## 网络测速仪
