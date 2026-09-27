@@ -1,22 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
+  <link rel="canonical" href="https://sdise.github.io/projects/vpngate/">
+  <meta name="robots" content="index,follow">
+  <meta name="author" content="len">
+  <meta name="keywords" content="vpngate, VPNGate, xray, VLESS, Clash 订阅, GitHub Actions, 节点采集">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>vpngate：VPNGate 节点自动采集与 VLESS 订阅 | blog</title>
-  <meta name="description" content="每小时从 VPNGate 官方 API 采集志愿者中继节点，每天用 xray 内核逐个实测连通性，只把有效节点生成 v2rayN / Clash 订阅；三层数据流水线与 GitHub Actions 全自动运转。">
+  <title>vpngate：VPNGate 节点自动采集与 VLESS 订阅 | sdise 的博客</title>
+  <meta name="description" content="每小时从 VPNGate 官方 API 采集志愿者中继节点，每天用 xray 内核逐个实测连通性，只把实测有效的节点生成 v2rayN / Clash 订阅，全流程 GitHub Actions 托管。">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="vpngate：VPNGate 节点自动采集与 VLESS 订阅">
+  <meta property="og:title" content="vpngate：VPNGate 节点自动采集与 VLESS 订阅 | sdise 的博客">
   <meta property="og:url" content="https://sdise.github.io/projects/vpngate/">
-  <meta property="og:site_name" content="blog">
-  <meta property="og:description" content="原始库 → 有效库 → 订阅文件的三层架构，安全护栏、增量去重与每周清理，全部由 GitHub Actions 定时驱动。">
+  <meta property="og:site_name" content="sdise 的博客">
+  <meta property="og:description" content="每小时从 VPNGate 官方 API 采集志愿者中继节点，每天用 xray 内核逐个实测连通性，只把实测有效的节点生成 v2rayN / Clash 订阅，全流程 GitHub Actions 托管。">
   <meta property="og:locale" content="zh_CN">
   <meta property="article:author" content="len">
   <meta name="twitter:card" content="summary">
-  <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
-  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" href="/atom.xml" title="sdise 的博客" type="application/atom+xml">
+  <link rel="shortcut icon" href="/favicon.svg">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/projects.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "vpngate",
+      "description": "VPNGate 节点自动采集与 VLESS 订阅生成",
+      "codeRepository": "https://github.com/sdise/vpngate",
+      "programmingLanguage": "Python",
+      "author": {
+        "@type": "Person",
+        "@id": "https://sdise.github.io/#person",
+        "name": "len"
+      },
+      "url": "https://sdise.github.io/projects/vpngate/"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "首页",
+          "item": "https://sdise.github.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "开源项目",
+          "item": "https://sdise.github.io/projects/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "vpngate",
+          "item": "https://sdise.github.io/projects/vpngate/"
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 
 <body>

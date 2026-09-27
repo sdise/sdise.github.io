@@ -1,22 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
+  <link rel="canonical" href="https://sdise.github.io/projects/cf-b2-worker/">
+  <meta name="robots" content="index,follow">
+  <meta name="author" content="len">
+  <meta name="keywords" content="cf-b2-worker, Cloudflare Workers, Backblaze B2, S3 SigV4, 对象存储, 图床, 私有网盘">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>cf-b2-worker：Cloudflare Workers ⇄ Backblaze B2 一体化网关 | blog</title>
-  <meta name="description" content="单文件、零依赖的 Cloudflare Worker：内置 AWS SigV4 签名与网页文件管理器，把 Backblaze B2 桶变成一个可读写、可缓存、可鉴权的 CDN 源站，回源与出网双向免流量费。">
+  <title>cf-b2-worker：Cloudflare Workers ⇄ Backblaze B2 一体化网关 | sdise 的博客</title>
+  <meta name="description" content="单文件、零依赖的 Cloudflare Worker：自带 AWS SigV4 实现与网页文件管理器，把 Backblaze B2 桶变成可读写、可缓存、可鉴权的 CDN 源站，回源与出网双向免流量费。">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="cf-b2-worker：Cloudflare Workers ⇄ Backblaze B2 一体化网关">
+  <meta property="og:title" content="cf-b2-worker：Cloudflare Workers ⇄ Backblaze B2 一体化网关 | sdise 的博客">
   <meta property="og:url" content="https://sdise.github.io/projects/cf-b2-worker/">
-  <meta property="og:site_name" content="blog">
-  <meta property="og:description" content="对比 CF-Proxy-B2 与 cw4b2 后重写的 B2 网关：SigV4 自实现、读写闭环、预签名直传、分片上传、Cache API、路径穿越防护。">
+  <meta property="og:site_name" content="sdise 的博客">
+  <meta property="og:description" content="单文件、零依赖的 Cloudflare Worker：自带 AWS SigV4 实现与网页文件管理器，把 Backblaze B2 桶变成可读写、可缓存、可鉴权的 CDN 源站，回源与出网双向免流量费。">
   <meta property="og:locale" content="zh_CN">
   <meta property="article:author" content="len">
   <meta name="twitter:card" content="summary">
-  <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
-  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" href="/atom.xml" title="sdise 的博客" type="application/atom+xml">
+  <link rel="shortcut icon" href="/favicon.svg">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/projects.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "cf-b2-worker",
+      "description": "Cloudflare Workers ⇄ Backblaze B2 一体化网关",
+      "codeRepository": "https://github.com/sdise/cf-b2-worker",
+      "programmingLanguage": "JavaScript",
+      "author": {
+        "@type": "Person",
+        "@id": "https://sdise.github.io/#person",
+        "name": "len"
+      },
+      "url": "https://sdise.github.io/projects/cf-b2-worker/"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "首页",
+          "item": "https://sdise.github.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "开源项目",
+          "item": "https://sdise.github.io/projects/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "cf-b2-worker",
+          "item": "https://sdise.github.io/projects/cf-b2-worker/"
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 
 <body>

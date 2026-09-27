@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN">
+  <title>sdise 的博客</title>
+  <subtitle>Cloudflare Workers 开源项目与网络工具</subtitle>
+  <link href="https://sdise.github.io/atom.xml" rel="self"/>
+  <link href="https://sdise.github.io/"/>
+  <id>https://sdise.github.io/</id>
+  <updated>2026-09-27T00:00:00Z</updated>
+  <author>
+    <name>len</name>
+  </author>
+
+  <entry>
+    <title>cf-b2-worker：Cloudflare Workers ⇄ Backblaze B2 一体化网关</title>
+    <link href="https://sdise.github.io/projects/cf-b2-worker/"/>
+    <id>https://sdise.github.io/projects/cf-b2-worker/</id>
+    <updated>2026-09-27T00:00:00Z</updated>
+    <summary type="html">单文件、零依赖的 Cloudflare Worker：内置 AWS SigV4 签名与网页文件管理器，把 Backblaze B2 桶变成可读写、可缓存、可鉴权的 CDN 源站。</summary>
+  </entry>
+
+  <entry>
+    <title>cf-vpngate：VLESS 入站 + SSTP / ProxyIP 落地的 Cloudflare Worker</title>
+    <link href="https://sdise.github.io/projects/cf-vpngate/"/>
+    <id>https://sdise.github.io/projects/cf-vpngate/</id>
+    <updated>2026-09-27T00:00:00Z</updated>
+    <summary type="html">前端 VLESS over WebSocket / XHTTP，后端可走 SSTP（VPN Gate 公共节点）、ProxyIP、socks5、http(s) 或 TXT 记录随机落地。</summary>
+  </entry>
+
+  <entry>
+    <title>vpngate：VPNGate 节点自动采集与 VLESS 订阅</title>
+    <link href="https://sdise.github.io/projects/vpngate/"/>
+    <id>https://sdise.github.io/projects/vpngate/</id>
+    <updated>2026-09-27T00:00:00Z</updated>
+    <summary type="html">每小时从 VPNGate 官方 API 采集节点，每天用 xray 内核逐个实测连通性，只把有效节点做成 v2rayN / Clash 订阅。</summary>
+  </entry>
+
+  <entry>
+    <title>网络测速仪（在线测延迟 / 抖动 / 下载 / 上传）</title>
+    <link href="https://sdise.github.io/speed.html"/>
+    <id>https://sdise.github.io/speed.html</id>
+    <updated>2026-09-27T00:00:00Z</updated>
+    <summary type="html">纯前端网络测速：多取样延迟与抖动、多并发下载与上传带宽测速、TTFB 与链路诊断。</summary>
+  </entry>
+
+  <entry>
+    <title>Hello World</title>
+    <link href="https://sdise.github.io/2024/12/11/hello-world/"/>
+    <id>https://sdise.github.io/2024/12/11/hello-world/</id>
+    <updated>2024-12-11T06:37:10Z</updated>
+    <summary type="html">Hexo 建站后的第一篇文章。</summary>
+  </entry>
+</feed>

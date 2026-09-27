@@ -1,22 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
+  <link rel="canonical" href="https://sdise.github.io/projects/cf-vpngate/">
+  <meta name="robots" content="index,follow">
+  <meta name="author" content="len">
+  <meta name="keywords" content="cf-vpngate, VLESS, XHTTP, SSTP, PPP, ProxyIP, Cloudflare Workers, VPNGate">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>cf-vpngate：VLESS 入站 + SSTP / ProxyIP 落地的 Cloudflare Worker | blog</title>
-  <meta name="description" content="前端 VLESS over WebSocket / XHTTP，后端可走 SSTP（VPN Gate 公共节点）、ProxyIP、socks5、http(s) 或 TXT 记录随机落地；SSTP 分支在 Worker 内完成 PPP 协商与 IPv4/TCP 手工封装。">
+  <title>cf-vpngate：VLESS 入站 + SSTP / ProxyIP 落地的 Cloudflare Worker | sdise 的博客</title>
+  <meta name="description" content="前端 VLESS over WebSocket / XHTTP，后端可走 SSTP（VPN Gate 公共节点）、ProxyIP、socks5、http(s) 或 TXT 记录随机落地，Worker 内完成 PPP 协商与 IPv4/TCP 封装。">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="cf-vpngate：VLESS 入站 + SSTP / ProxyIP 落地的 Cloudflare Worker">
+  <meta property="og:title" content="cf-vpngate：VLESS 入站 + SSTP / ProxyIP 落地的 Cloudflare Worker | sdise 的博客">
   <meta property="og:url" content="https://sdise.github.io/projects/cf-vpngate/">
-  <meta property="og:site_name" content="blog">
-  <meta property="og:description" content="按上游 snippet.js 重构的协议实验项目：14 个分区、CONFIG 集中配置、DoH 缓存、BYOB 读、上下行攒包与背压、UDP(53) 转 TCP DNS。">
+  <meta property="og:site_name" content="sdise 的博客">
+  <meta property="og:description" content="前端 VLESS over WebSocket / XHTTP，后端可走 SSTP（VPN Gate 公共节点）、ProxyIP、socks5、http(s) 或 TXT 记录随机落地，Worker 内完成 PPP 协商与 IPv4/TCP 封装。">
   <meta property="og:locale" content="zh_CN">
   <meta property="article:author" content="len">
   <meta name="twitter:card" content="summary">
-  <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
-  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" href="/atom.xml" title="sdise 的博客" type="application/atom+xml">
+  <link rel="shortcut icon" href="/favicon.svg">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/projects.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "cf-vpngate",
+      "description": "VLESS 入站 + SSTP / ProxyIP 落地的 Cloudflare Worker",
+      "codeRepository": "https://github.com/sdise/cf-vpngate",
+      "programmingLanguage": "JavaScript",
+      "author": {
+        "@type": "Person",
+        "@id": "https://sdise.github.io/#person",
+        "name": "len"
+      },
+      "url": "https://sdise.github.io/projects/cf-vpngate/"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "首页",
+          "item": "https://sdise.github.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "开源项目",
+          "item": "https://sdise.github.io/projects/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "cf-vpngate",
+          "item": "https://sdise.github.io/projects/cf-vpngate/"
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 
 <body>
