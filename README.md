@@ -22,6 +22,17 @@
 - **vpngate** — VPNGate 节点自动采集与订阅生成：每小时从官方 API 增量入库，每天用 xray 内核逐条实测连通性，只把实测有效的节点输出成 v2rayN / Clash 两种订阅。
   <https://sdise.github.io/projects/vpngate/>
 
+- **javascript-store** — 暂无描述
+  <https://github.com/sdise/javascript-store>
+- **proxypool** — 暂无描述
+  <https://github.com/sdise/proxypool>
+- **web_speed** — 暂无描述
+  <https://github.com/sdise/web_speed>
+- **cf-b2** — 暂无描述
+  <https://github.com/sdise/cf-b2>
+- **vpngate-test** — Cloudflare Worker：VPNGate 节点 SSTP 在线检测 + VLESS 链接转换（带 Web 界面）
+  <https://github.com/sdise/vpngate-test>
+
 ## 网络测速仪
 
 <https://sdise.github.io/speed.html>
