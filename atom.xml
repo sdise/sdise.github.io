@@ -5,10 +5,26 @@
   <link href="https://sdise.github.io/atom.xml" rel="self"/>
   <link href="https://sdise.github.io/"/>
   <id>https://sdise.github.io/</id>
-  <updated>2026-09-27T00:00:00Z</updated>
+  <updated>2026-09-28T02:30:00Z</updated>
   <author>
     <name>len</name>
   </author>
+
+  <entry>
+    <title>vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器</title>
+    <link href="https://sdise.github.io/2026/09/28/vpngate-test/"/>
+    <id>https://sdise.github.io/2026/09/28/vpngate-test/</id>
+    <updated>2026-09-28T02:30:00Z</updated>
+    <summary type="html">单文件 Cloudflare Worker：粘贴节点或 vpngate.csv，在边缘节点直连做完整 SSTP 握手（LCP / PAP / IPCP）挑出有效节点，再一键转成 vless:// 链接；含踩坑记录（compatibility_date 10021、Cloudflare 屏蔽端口等）。</summary>
+  </entry>
+
+  <entry>
+    <title>vpngate-test：VPNGate 节点在线检测 + VLESS 链接转换（项目页）</title>
+    <link href="https://sdise.github.io/projects/vpngate-test/"/>
+    <id>https://sdise.github.io/projects/vpngate-test/</id>
+    <updated>2026-09-28T02:30:00Z</updated>
+    <summary type="html">自带 Web 界面的节点体检工具：支持多种输入格式、SSE 流式结果、HTTP API，转换时 UUID / ENTRY_HOST / ENTRY_PORT / Host-SNI / ws-xhttp / global 全部可自定义。</summary>
+  </entry>
 
   <entry>
     <title>cf-b2-worker：Cloudflare Workers ⇄ Backblaze B2 一体化网关</title>

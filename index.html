@@ -159,6 +159,18 @@
           </div>
           <div class="proj-meta">原始库 → 有效库 → 订阅 三层流水线，含 20% 有效性安全护栏</div>
         </div>
+
+        <div class="proj-card">
+          <h3><a href="/projects/vpngate-test/">vpngate-test</a></h3>
+          <p>VPNGate 节点在线检测 + VLESS 链接转换：粘贴节点或 vpngate.csv，在 Cloudflare 边缘节点直连做完整 SSTP 握手（LCP / PAP / IPCP）挑出有效节点，再一键转成 vless:// 链接。</p>
+          <div class="tag-row">
+            <span class="tag">Cloudflare Workers</span>
+            <span class="tag">SSTP / PPP</span>
+            <span class="tag">VLESS</span>
+            <span class="tag green">单文件零依赖</span>
+          </div>
+          <div class="proj-meta">SSE 流式结果 · 六个转换参数可自定义 · <a href="https://vpngate-test.edgeoneai.cc.cd/" target="_blank" rel="noopener">在线预览</a></div>
+        </div>
       </div>
 
       <p>另外做了一个 <a href="/speed.html"><strong>网络测速仪</strong></a>：纯前端的延迟 / 抖动 / 下载 / 上传测速与链路诊断，打开即用。</p>
@@ -167,6 +179,43 @@
 </article>
 
   
+    <article id="post-vpngate-test" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2026/09/28/vpngate-test/" class="article-date">
+  <time class="dt-published" datetime="2026-09-28T02:30:00.000Z" itemprop="datePublished">2026-09-28</time>
+</a>
+    <span class="tag gray">Cloudflare Workers</span>
+    <span class="tag gray">SSTP / PPP</span>
+    <span class="tag gray">VLESS</span>
+  </div>
+  <div class="article-inner">
+
+
+      <header class="article-header">
+
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2026/09/28/vpngate-test/">vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器</a>
+    </h1>
+
+      </header>
+
+    <div class="e-content article-entry" itemprop="articleBody">
+
+        <p>把以前要在本地跑 Python 脚本才能做的事 —— <em>验证 VPNGate 节点还活着吗</em> —— 做成一个<strong>单文件 Cloudflare Worker</strong>：粘贴节点（或整段 <code>vpngate.csv</code>），在边缘节点上直连目标做一次完整的 <strong>SSTP 握手</strong>，把还能用的挑出来，再一键转成可以直接导入 v2rayN / Shadowrocket 的 <code>vless://</code> 链接。不装任何东西，浏览器打开即用。</p>
+
+        <p>它支持主机名:端口 / IP:端口 / IPv6 / <code>sstp://</code> / <code>vless://</code> / vpngate.csv / 官方 API CSV / 空格分隔等多种输入，单行多行可混写；检测走 SSE 流式推送，进度与结果逐条刷新；转换时 UUID、ENTRY_HOST、ENTRY_PORT、Host/SNI、TYPE（ws / xhttp）、GLOBAL 六个参数都能自定义。文末还记录了这次踩到的坑：<code>compatibility_date</code> 写成「本地今天」导致的 <code>10021</code>、Cloudflare 屏蔽端口（含 VPNGate 常用的 <code>995</code>）等等。</p>
+
+        <p><a href="/2026/09/28/vpngate-test/">阅读全文 →</a> ｜ <a href="https://vpngate-test.edgeoneai.cc.cd/" target="_blank" rel="noopener">在线预览</a> ｜ <a href="https://github.com/sdise/vpngate-test" target="_blank" rel="noopener">GitHub 仓库</a></p>
+
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://sdise.github.io/2026/09/28/vpngate-test/" data-id="vpngate-test-2026" data-title="vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器" class="article-share-link"><span class="fa fa-share">Teilen</span></a>
+
+    </footer>
+  </div>
+
+</article>
+
     <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/12/11/hello-world/" class="article-date">
@@ -240,6 +289,7 @@
         <li><a href="/projects/cf-b2-worker/">cf-b2-worker</a></li>
         <li><a href="/projects/cf-vpngate/">cf-vpngate</a></li>
         <li><a href="/projects/vpngate/">vpngate</a></li>
+        <li><a href="/projects/vpngate-test/">vpngate-test</a></li>
         <li><a href="/speed.html">网络测速仪</a></li>
       </ul>
     </div>
@@ -250,7 +300,10 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archiv</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">十二月 2024</a></li></ul>
+      <ul class="archive-list">
+        <li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/09/">九月 2026</a></li>
+        <li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">十二月 2024</a></li>
+      </ul>
     </div>
   </div>
 
@@ -261,6 +314,10 @@
     <h3 class="widget-title">letzter Beitrag</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2026/09/28/vpngate-test/">vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器</a>
+          </li>
         
           <li>
             <a href="/2024/12/11/hello-world/">Hello World</a>

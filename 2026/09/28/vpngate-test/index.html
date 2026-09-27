@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="https://sdise.github.io/2026/09/28/vpngate-test/">
+  <meta name="robots" content="index,follow">
+  <meta name="author" content="len">
+  <meta name="keywords" content="vpngate-test, VPNGate, SSTP, PPP, VLESS, Cloudflare Workers, 节点检测, 订阅转换, SSE, 开源项目">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器 | sdise 的博客</title>
+  <meta name="description" content="单文件 Cloudflare Worker：粘贴节点或 vpngate.csv，在边缘节点直连做 SSTP 握手（LCP / PAP / IPCP）挑出还活着的节点，再一键转成 vless:// 链接，支持自定义 UUID、入口、SNI、ws/xhttp 与 global 三态。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器 | sdise 的博客">
+<meta property="og:url" content="https://sdise.github.io/2026/09/28/vpngate-test/">
+<meta property="og:site_name" content="sdise 的博客">
+<meta property="og:description" content="单文件 Cloudflare Worker：粘贴节点或 vpngate.csv，在边缘节点直连做 SSTP 握手挑出还活着的节点，再一键转成 vless:// 链接。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-09-28T02:30:00.000Z">
+<meta property="article:modified_time" content="2026-09-28T02:30:00.000Z">
+<meta property="article:author" content="len">
+<meta name="twitter:card" content="summary">
+  <link rel="alternate" href="/atom.xml" title="sdise 的博客" type="application/atom+xml">
+  <link rel="shortcut icon" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/projects.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "headline": "vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器",
+      "url": "https://sdise.github.io/2026/09/28/vpngate-test/",
+      "mainEntityOfPage": "https://sdise.github.io/2026/09/28/vpngate-test/",
+      "datePublished": "2026-09-28T02:30:00.000Z",
+      "dateModified": "2026-09-28T02:30:00.000Z",
+      "description": "单文件 Cloudflare Worker：粘贴节点或 vpngate.csv，在边缘节点直连做 SSTP 握手挑出还活着的节点，再一键转成 vless:// 链接。",
+      "keywords": "vpngate-test, VPNGate, SSTP, PPP, VLESS, Cloudflare Workers, 节点检测",
+      "author": {
+        "@type": "Person",
+        "@id": "https://sdise.github.io/#person",
+        "name": "len"
+      },
+      "publisher": {
+        "@type": "Person",
+        "@id": "https://sdise.github.io/#person",
+        "name": "len"
+      },
+      "inLanguage": "zh-CN",
+      "isPartOf": {
+        "@id": "https://sdise.github.io/#website"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "首页",
+          "item": "https://sdise.github.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "文章归档",
+          "item": "https://sdise.github.io/archives/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器",
+          "item": "https://sdise.github.io/2026/09/28/vpngate-test/"
+        }
+      ]
+    }
+  ]
+}
+</script>
+  <!-- ===== 搜索引擎站点验证（占位，需替换 content） ===== -->
+  <!-- Google Search Console: https://search.google.com/search-console 添加资源 sdise.github.io 后，
+       复制“HTML 标记”里的 content 值替换下方占位 -->
+  <meta name="google-site-verification" content="REPLACE_WITH_GOOGLE_VERIFICATION_CODE">
+  <!-- Bing Webmaster Tools: https://www.bing.com/webmasters 添加站点后，
+       复制“元标记”里的 content 值替换下方占位 -->
+  <meta name="msvalidate.01" content="REPLACE_WITH_BING_VERIFICATION_CODE">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        <a class="main-nav-link" href="/">Home</a>
+        <a class="main-nav-link" href="/archives">Archives</a>
+        <a class="main-nav-link" href="/projects/">项目</a>
+        <a class="main-nav-link" href="/speed.html">测速</a>
+      </nav>
+      <nav id="sub-nav">
+        <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        <a class="nav-icon nav-search-btn" title="Suche"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Suche"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://sdise.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-vpngate-test" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2026/09/28/vpngate-test/" class="article-date">
+  <time class="dt-published" datetime="2026-09-28T02:30:00.000Z" itemprop="datePublished">2026-09-28</time>
+</a>
+    <span class="tag gray">Cloudflare Workers</span>
+    <span class="tag gray">SSTP / PPP</span>
+    <span class="tag gray">VLESS</span>
+  </div>
+  <div class="article-inner">
+
+      <header class="article-header">
+
+    <h1 class="p-name article-title" itemprop="headline name">
+      vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器
+    </h1>
+
+      </header>
+
+    <div class="e-content article-entry" itemprop="articleBody">
+
+        <p><strong>一句话概括</strong>：把以前要在本地跑 Python 脚本才能做的事 —— <em>验证 VPNGate 节点还活着吗</em> —— 做成一个<strong>单文件 Cloudflare Worker</strong>：粘贴节点（或整段 <code>vpngate.csv</code>），在 Cloudflare 边缘节点上直连目标做一次完整的 <strong>SSTP 握手</strong>，把还能用的挑出来，再一键转成可以直接导入 v2rayN / Shadowrocket 的 <code>vless://</code> 链接。<strong>不装任何东西，浏览器打开即用。</strong></p>
+
+        <p>
+          <a class="btn-link" href="https://vpngate-test.edgeoneai.cc.cd/" target="_blank" rel="noopener">在线预览</a>
+          <a class="btn-link ghost" href="https://github.com/sdise/vpngate-test" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a class="btn-link ghost" href="https://github.com/sdise/vpngate-test/blob/main/DEPLOY.md" target="_blank" rel="noopener">部署文档</a>
+        </p>
+
+        <div class="tag-row">
+          <span class="tag">Cloudflare Workers</span>
+          <span class="tag">SSTP / PPP</span>
+          <span class="tag">VLESS / XHTTP</span>
+          <span class="tag">SSE 流式结果</span>
+          <span class="tag green">单文件零依赖</span>
+          <span class="tag amber">协议研究 · 学习性质</span>
+        </div>
+
+        <div class="callout info">
+          <p>在线预览：<a href="https://vpngate-test.edgeoneai.cc.cd/" target="_blank" rel="noopener">https://vpngate-test.edgeoneai.cc.cd/</a>（可直接拿去用；也能用一键部署按钮部署到自己的 Cloudflare 账号）</p>
+        </div>
+
+        <h2 id="为什么做这个"><a href="#为什么做这个" class="headerlink" title="为什么做这个"></a>为什么做这个</h2>
+
+        <p>我维护过一个 <a href="/projects/vpngate/">vpngate</a> 项目：每小时抓 VPNGate 官方 API 入库，每天用 xray 内核逐条实测，只把有效的做成订阅。但那套流程是「GitHub Actions + xray 内核 + 十几分钟」，日常想<strong>临时看几个节点还活着没有</strong>，太重了。</p>
+
+        <p>于是先写了 <code>scripts/sstp_check.py</code>：纯标准库，直接对节点做 SSTP 握手，不需要 xray。它很好用，但仍然要求「有 Python 环境、会敲命令」。这次的 <strong>vpngate-test</strong> 就是把它搬到浏览器里：</p>
+
+        <table>
+          <thead><tr><th></th><th><code>sstp_check.py</code></th><th>vpngate-test</th></tr></thead>
+          <tbody>
+            <tr><td>运行环境</td><td>本地 Python 3（标准库）</td><td>Cloudflare Worker（边缘节点）</td></tr>
+            <tr><td>要装什么</td><td>需要 Python</td><td>什么都不用，打开网页</td></tr>
+            <tr><td>交互</td><td>命令行 <code>--file / --csv / --link</code></td><td>Web 界面 + HTTP API</td></tr>
+            <tr><td>检测内容</td><td>SSTP 握手（+ 可选 TCP 出网）</td><td><strong>完全相同</strong></td></tr>
+            <tr><td>输出</td><td>stdout / <code>--out</code> 文件</td><td>界面结果 + 复制 / 下载 + <code>vless://</code> 链接</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="功能一览"><a href="#功能一览" class="headerlink" title="功能一览"></a>功能一览</h2>
+
+        <table>
+          <thead><tr><th>功能</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><strong>解析 / 提取</strong></td><td>从混乱输入里抠出「主机名/IP:端口」。支持单行、多行、多种格式混写，自动去重（按 <code>host:port</code>），<code>#</code> 开头的行视为注释</td></tr>
+            <tr><td><strong>SSTP 实测</strong></td><td>直连每个节点，完整跑一遍 SSTP 建链 + PPP 协商，拿到虚拟 IP 才算有效；可选再经隧道做一次 TCP 三次握手，验证节点真能出网</td></tr>
+            <tr><td><strong>实时输出</strong></td><td>SSE 流式推送，逐条刷出结果（成功 / 失败、耗时、分配到的 IP），带进度条与统计</td></tr>
+            <tr><td><strong>转 vless 链接</strong></td><td>批量把 <code>主机名/IP:端口</code> 转成 <code>vless://</code>，UUID、入口、SNI、传输类型、<code>global</code> 全部可自定义</td></tr>
+            <tr><td><strong>HTTP API</strong></td><td><code>/api/parse</code>、<code>/api/test</code>（SSE）、<code>/api/convert</code>，可以 curl 或接到自己的流水线里</td></tr>
+            <tr><td><strong>暖色 / 暗色</strong></td><td>右上角一键切换，选择记在 <code>localStorage</code>，默认暖色</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="支持的输入格式"><a href="#支持的输入格式" class="headerlink" title="支持的输入格式"></a>支持的输入格式</h2>
+
+        <p>单行、多行、混合都可以，空行与 <code>#</code> 注释行会跳过：</p>
+
+        <table>
+          <thead><tr><th>格式</th><th>示例</th></tr></thead>
+          <tbody>
+            <tr><td>主机名:端口</td><td><code>vpn228702251.opengw.net:1587</code></td></tr>
+            <tr><td>IP:端口 / IPv6</td><td><code>220.233.92.218:1587</code>、<code>[2001:db8::1]:443</code></td></tr>
+            <tr><td>只有主机名</td><td><code>vpn228702251.opengw.net</code>（用「缺省端口」，默认 443）</td></tr>
+            <tr><td>sstp 链接</td><td><code>sstp://vpn:vpn@vpn228702251.opengw.net:1587</code></td></tr>
+            <tr><td>vless 链接</td><td>自动从 <code>path</code> 里的 <code>fdip=sstp://…</code> 取出真实节点，<code>#fragment</code> 当备注</td></tr>
+            <tr><td>vpngate.csv</td><td>含表头 <code>Country,Hostname,IP,Speed_Mbps,TCP_Port</code>，<strong>整段粘贴即可</strong></td></tr>
+            <tr><td>VPNGate 官方 API CSV</td><td>字段名自动识别（<code>#HostName</code> / <code>IP</code> / <code>TCP_Port</code> …）</td></tr>
+            <tr><td>空格分隔</td><td><code>Japan vpn228702251.opengw.net 1587</code></td></tr>
+          </tbody>
+        </table>
+
+        <p>CSV 会扫前 5 行找表头，按列名匹配：主机列取 <code>Hostname/HostName/Host</code>（取不到就退回 <code>IP</code> 列），端口列取 <code>TCP_Port/Port/TCP</code>，国家列取 <code>Country/CountryLong/CountryShort/Region</code>（用于生成备注），速度列取 <code>Speed_Mbps/Speed</code>。引号包裹的字段按标准 CSV 规则处理，所以 <code>Croatia (LOCAL Name: Hrvatska)</code> 这种带括号的国家名不会被逗号切坏。</p>
+
+        <h2 id="检测原理"><a href="#检测原理" class="headerlink" title="检测原理"></a>检测原理</h2>
+
+        <p>和 <code>sstp_check.py</code>、<a href="/projects/cf-vpngate/">cf-vpngate</a> 完全一致的四步：</p>
+
+        <pre><code>1) TLS 连上节点
+   connect({ hostname, port }, { secureTransport: 'on' })
+   VPNGate 节点用自签证书，Cloudflare 出站 TLS 不阻断自签，能连上
+
+2) 发一个「永不结束」的 HTTP 请求，把这条 TLS 流变成全双工 SSTP 隧道
+   SSTP_DUPLEX_POST /sra_{BA195980-CD49-458b-9E23-C84EE0ADCD75}/ HTTP/1.1
+   Host: &lt;节点主机名&gt;
+   Content-Length: 18446744073709551615
+   SSTPCORRELATIONID: {&lt;uuid&gt;}
+   → 服务端回 200 即建链成功
+
+3) 同一流里发 SSTP 控制报文 MSG_CALL_CONNECT_REQUEST（封装协议 = PPP）
+   + SSTP 数据报文（载荷是 PPP 帧）
+
+4) PPP 协商
+   LCP   Configure-Request / Ack       → 链路参数协商（MRU 1500）
+   PAP   Authenticate-Request          → 账号密码固定 vpn / vpn
+   IPCP  Configure-Request / Nak / Ack → 服务端分配虚拟 IPv4
+   → 拿到 IP 即判定该节点有效</code></pre>
+
+        <p>勾选「额外验证出网」后，还会在 PPP 之上<strong>手工构造 IPv4 + TCP 报文</strong>（自己算首部与伪首部校验和），对目标完成 <code>SYN → SYN+ACK → ACK</code>，证明这个节点不只是握得上手，还能把流量真的送出去。</p>
+
+        <div class="callout">
+          <p>它验证的是<strong>「这个 VPNGate 节点本身还活着」</strong>，不是「入口 + 节点整条链路可用」。要测整条链路，得把生成的链接导入客户端实测，或用 vpngate 项目里的 xray 实测脚本。</p>
+        </div>
+
+        <h2 id="链接转换"><a href="#链接转换" class="headerlink" title="链接转换"></a>链接转换：六个可自定义项</h2>
+
+        <p>「转换为 vless 链接」按界面里的参数生成，生成结果与 vpngate 订阅里的链接<strong>同构</strong>：</p>
+
+        <pre><code>vless://{UUID}@{ENTRY_HOST}:{ENTRY_PORT}
+  ?encryption=none&amp;security=tls
+  &amp;sni={SNI}&amp;fp=chrome&amp;type=ws
+  &amp;alpn=h3,h2&amp;host={SNI}
+  &amp;path=/fdip=sstp://vpn:vpn@{节点}:{端口}?ed=2560[&amp;global=1]
+  #vpngate.me | {国家} | {短主机名}</code></pre>
+
+        <table>
+          <thead><tr><th>参数</th><th>默认</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><strong>UUID</strong></td><td><code>495c7195-…</code></td><td>必须与服务端一致，否则鉴权直接失败</td></tr>
+            <tr><td><strong>ENTRY_HOST</strong></td><td><code>saas.sin.fan</code></td><td>入口地址，<strong>域名或 IP 都行</strong>；必须是运行 cf-vpngate 类服务端的接入点</td></tr>
+            <tr><td><strong>ENTRY_PORT</strong></td><td><code>443</code></td><td>入口端口</td></tr>
+            <tr><td><strong>Host / SNI</strong></td><td><code>snip.edgeoneai.cc.cd</code></td><td>TLS 的 SNI，同时作为 WS / XHTTP 请求的 <code>Host</code></td></tr>
+            <tr><td><strong>TYPE</strong></td><td><code>ws</code></td><td><code>ws</code> 或 <code>xhttp</code>（xhttp 会自动补 <code>mode=stream-one</code> 与 <code>alpn=h2</code>）</td></tr>
+            <tr><td><strong>GLOBAL</strong></td><td>不追加</td><td>三态：<code>不追加</code> / <code>global=1</code>（强制走 SSTP 落地）/ <code>global=0</code>（不强制，先直连）</td></tr>
+            <tr><td>ed</td><td><code>2560</code></td><td>Early Data 长度</td></tr>
+            <tr><td>备注模板</td><td><code>vpngate.me | {country} | {name}</code></td><td>可用 <code>{country} {name} {host} {port}</code></td></tr>
+          </tbody>
+        </table>
+
+        <p>「两段式」结构值得单独说明：<strong>入口固定</strong>（<code>@</code> 后面是 VLESS + TLS + WS 接入点，SNI 与 Host 伪装成同一个域名），<strong>出口每条不同</strong>（<code>path</code> 里的 <code>/fdip=sstp://vpn:vpn@节点:端口</code>，入口收到连接后用 SSTP 拨号到对应节点，再把流量桥回去）。所以换节点只需要换 <code>path</code>，入口完全不用动。</p>
+
+        <div class="callout">
+          <p><strong>转换范围有限，先看清楚：</strong>这里只生成 <code>VLESS + WebSocket/XHTTP + TLS</code> 这一种链接（<code>security</code> 恒为 <code>tls</code>、<code>encryption</code> 恒为 <code>none</code>），<strong>不支持</strong> Reality / 非 TLS，也不做 trojan / vmess / ss 与 TCP / gRPC / HTTPUpgrade 的转换。</p>
+        </div>
+
+        <p>另外选了 <code>xhttp</code> 时要注意：客户端 xhttp 的 <strong>extra</strong> 必须与服务端一致，否则握手会失败或直接超时。界面里选 xhttp 会<strong>自动展开</strong>一份常用 extra 供照抄：</p>
+
+        <pre><code>{
+  "extra": {
+    "noGRPCHeader": true,
+    "headers": { "Content-Type": "application/octet-stream" },
+    "xPaddingBytes": "100-1000",
+    "xPaddingObfsMode": true,
+    "xPaddingMethod": "tokenish",
+    "xPaddingPlacement": "queryInHeader",
+    "xPaddingHeader": "X-Cache",
+    "xPaddingKey": "_dc"
+  }
+}</code></pre>
+
+        <h2 id="实现上的几个点"><a href="#实现上的几个点" class="headerlink" title="实现上的几个点"></a>实现上的几个点</h2>
+
+        <ul>
+          <li><strong>单文件</strong>：整个项目就一个 <code>worker.js</code>（含内嵌前端页面），没有构建步骤、没有依赖，既能 <code>wrangler deploy</code>，也能整段粘贴到 Cloudflare 控制台；</li>
+          <li><strong>SSE 流式</strong>：检测接口用 <code>text/event-stream</code> 逐条推 <code>start / result / warn / done</code> 事件，前端用 <code>fetch</code> + <code>getReader()</code> 手解析（<code>EventSource</code> 不支持 POST），100 个节点也能实时看到进度；</li>
+          <li><strong>并发池 + 截止时间</strong>：并发数、单节点超时、整轮最大时长都可调，到点停止剩余节点并推一条 <code>warn</code>；</li>
+          <li><strong>BYOB 读 + 跨包拼接</strong>：SSTP 报文要按长度精确读，用 <code>getReader({mode:'byob'})</code> + <code>readAtLeast()</code> 零拷贝拼接；</li>
+          <li><strong>配置三层合并</strong>：<code>请求参数 &gt; 环境变量 &gt; 代码里的默认值</code>，所以同一个部署既能改环境变量定默认，也能在界面上临时覆盖。</li>
+        </ul>
+
+        <h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署：四种方式，两种能「推送即部署」</h2>
+
+        <p>推荐直接点仓库 README 顶部的 <strong>Deploy to Cloudflare</strong> 按钮：Cloudflare 会把仓库克隆到你自己的 GitHub 账号，用 <strong>Workers Builds</strong> 构建并部署，之后<strong>每次 push 自动重新部署</strong>，不需要配任何 Secret。</p>
+
+        <pre><code># 方式〇：一键部署按钮 / Workers Builds Git 集成（推送即自动部署）
+https://deploy.workers.cloudflare.com/?url=https://github.com/sdise/vpngate-test
+# 配置页里 Build command 留空，Deploy command 保持 npx wrangler deploy 即可
+
+# 方式一：Dashboard 手动部署
+新建 Worker → 编辑代码 → 全选粘贴 worker.js → 保存并部署
+
+# 方式二：wrangler CLI
+git clone https://github.com/sdise/vpngate-test.git &amp;&amp; cd vpngate-test
+npm install &amp;&amp; npx wrangler login
+npm run deploy
+
+# 方式三：GitHub Actions（可选，需配 CLOUDFLARE_API_TOKEN）
+# 没配 Token 时工作流会打印 Skipped 而不是报错，避免每次推送都是红叉</code></pre>
+
+        <p>部署完访问 <code>/healthz</code> 应返回 <code>{"ok":true,"service":"vpngate-test"}</code>。</p>
+
+        <h2 id="踩到的坑"><a href="#踩到的坑" class="headerlink" title="踩到的坑"></a>踩到的坑</h2>
+
+        <table>
+          <thead><tr><th>现象</th><th>原因与处理</th></tr></thead>
+          <tbody>
+            <tr><td><code>Can't set compatibility date in the future: 2026-09-28</code>（code 10021）</td><td>构建发生在 <strong>UTC 2026-09-27 18:26</strong>，而我把 <code>compatibility_date</code> 按本地日期（UTC+8）写成了 9/28，对 Cloudflare 来说那天还没到。改成已过去的日期（现在固定 <code>2026-09-25</code>）即可。这个坑在「本地时区比 UTC 快」时必踩</td></tr>
+            <tr><td>一批节点全是 <code>timeout</code></td><td>先看端口：Cloudflare 的 <code>connect()</code> 会屏蔽一部分端口（常见如 22 / 23 / 25 / 110 / 143 / 465 / 587 / 993 / <strong>995</strong> / 6667…），VPNGate 有不少节点用 995，这类节点在 Worker 上会一律失败，<strong>不是节点挂了</strong></td></tr>
+            <tr><td>并发开满后偶发中断</td><td>检测主要是等网络 I/O（不计 CPU），但并发过高仍会撞 Worker 的 CPU 上限。免费计划建议并发 ≤10、单次 ≤50；整轮默认还有 240s 的时长上限</td></tr>
+            <tr><td>改了 <code>[vars]</code> 不生效</td><td>环境变量改动必须重新部署一次（<code>wrangler deploy</code> 或让 Workers Builds 重新构建）</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2>
+
+        <pre><code>vpngate-test/
+├── worker.js             # 全部逻辑：SSTP 探测 + 解析 + 转换 + Web 界面（单文件）
+├── wrangler.toml         # name / main / compatibility_date / vars
+├── package.json          # dev / deploy / tail / check
+├── README.md             # 使用文档（输入格式、检测原理、API、FAQ）
+├── DEPLOY.md             # 部署文档（一键按钮 / Workers Builds / 手动 / CLI）
+├── scripts/              # 三个零依赖自检脚本
+│   ├── check-ui.js       #   校验内嵌前端各 script 块语法
+│   ├── check-parse.js    #   在 Node 里跑解析 / 转换逻辑
+│   └── check-routes.js   #   冒烟测试 /、/api/parse、/api/convert、/healthz
+└── .github/workflows/deploy.yml   # 可选：Actions 自动部署（无 Token 自动跳过）
+</code></pre>
+
+        <p>三个自检脚本都是<strong>把 <code>worker.js</code> 里的 Cloudflare 专属 <code>import</code>/<code>export</code> 替换掉后塞进 Node 执行</strong>，所以不装 wrangler 也能跑，改完代码 <code>npm run check</code> 即可回归。</p>
+
+        <h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2>
+
+        <p>这个项目本身不复杂，有意思的地方在于「把一套本地脚本的协议行为，原样搬到服务器端运行时」—— 报文格式、建链顺序、超时策略全都保持一致，于是本地 Python 版和 Worker 版可以互相印证：一边测出来有效、另一边无效，基本就能定位到是<strong>出口网络差异</strong>（端口屏蔽、节点对来源的限制）而不是代码问题。</p>
+
+        <p>配合已有的两个项目正好形成一条链：<a href="/projects/vpngate/">vpngate</a> 负责<strong>批量采集与订阅</strong>，<a href="/projects/cf-vpngate/">cf-vpngate</a> 是<strong>服务端</strong>，vpngate-test 则是夹在中间的<strong>体检工具</strong>。</p>
+
+        <div class="callout">
+          <p>本工具只做<strong>公开数据的连通性检测与格式转换</strong>，不提供任何代理服务、不中转任何流量。VPNGate 节点由全球志愿者运行，流量经过第三方节点，<strong>请勿传输敏感信息</strong>；请遵守所在国家/地区的法律法规与 Cloudflare 服务条款。</p>
+        </div>
+
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://sdise.github.io/2026/09/28/vpngate-test/" data-id="vpngate-test-2026" data-title="vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器" class="article-share-link"><span class="fa fa-share">Teilen</span></a>
+
+    </footer>
+  </div>
+
+</article>
+
+</section>
+
+          <aside id="sidebar">
+  <div class="widget-wrap">
+    <h3 class="widget-title">项目</h3>
+    <div class="widget">
+      <ul>
+        <li><a href="/projects/cf-b2-worker/">cf-b2-worker</a></li>
+        <li><a href="/projects/cf-vpngate/">cf-vpngate</a></li>
+        <li><a href="/projects/vpngate/">vpngate</a></li>
+        <li><a href="/projects/vpngate-test/">vpngate-test</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="widget-wrap">
+    <h3 class="widget-title">工具</h3>
+    <div class="widget">
+      <ul>
+        <li><a href="/speed.html">网络测速仪</a></li>
+        <li><a href="https://vpngate-test.edgeoneai.cc.cd/" target="_blank" rel="noopener">vpngate-test 在线检测</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list">
+        <li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/09/">九月 2026</a></li>
+        <li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">十二月 2024</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        <li>
+          <a href="/2026/09/28/vpngate-test/">vpngate-test：把 VPNGate 节点检测与 VLESS 链接转换搬进浏览器</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</aside>
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2026 len<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  <a href="/" class="mobile-nav-link">Home</a>
+  <a href="/archives" class="mobile-nav-link">Archives</a>
+  <a href="/projects/" class="mobile-nav-link">项目</a>
+  <a href="/speed.html" class="mobile-nav-link">测速</a>
+</nav>
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

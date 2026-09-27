@@ -10,6 +10,7 @@
 | --- | --- | --- |
 | 博客首页 | <https://sdise.github.io/index.html> | 开源项目介绍、部署与踩坑笔记，以及文章归档 |
 | 网络测速 | <https://sdise.github.io/speed.html> | 纯浏览器端的延迟 / 抖动 / 下载 / 上传测速与链路诊断，打开即用 |
+| VPNGate 节点检测 | <https://vpngate-test.edgeoneai.cc.cd/> | 在线检测 VPNGate 节点是否可用，并把节点转成 vless 链接（vpngate-test 的在线实例） |
 | 归档 | <https://sdise.github.io/archives> | 全部文章列表 |
 | 项目 | <https://sdise.github.io/projects/> | 开源项目索引 |
 
@@ -21,6 +22,8 @@
   <https://sdise.github.io/projects/cf-vpngate/>
 - **vpngate** — VPNGate 节点自动采集与订阅生成：每小时从官方 API 增量入库，每天用 xray 内核逐条实测连通性，只把实测有效的节点输出成 v2rayN / Clash 两种订阅。
   <https://sdise.github.io/projects/vpngate/>
+- **vpngate-test** — VPNGate 节点在线检测 + VLESS 链接转换：粘贴节点或整段 `vpngate.csv`，在 Cloudflare 边缘节点直连做完整 SSTP 握手（LCP / PAP / IPCP）挑出有效节点，再一键转成 `vless://` 链接（UUID / ENTRY_HOST / ENTRY_PORT / Host-SNI / ws-xhttp / global 均可自定义）。单文件 Worker，自带 Web 界面与 HTTP API。
+  项目页 <https://sdise.github.io/projects/vpngate-test/> ｜ 在线预览 <https://vpngate-test.edgeoneai.cc.cd/> ｜ 源码 <https://github.com/sdise/vpngate-test>
 
 - **javascript-store** — 暂无描述
   <https://github.com/sdise/javascript-store>
