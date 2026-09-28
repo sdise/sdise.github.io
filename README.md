@@ -16,8 +16,8 @@
 
 ## 开源项目
 
-- **cf-b2-worker** — Cloudflare Workers ⇄ Backblaze B2 一体化网关：自带 AWS SigV4 实现与网页文件管理器，读写闭环、预签名直传、分片上传；CF 与 B2 同属带宽联盟，回源与出网双向免流量费。
-  <https://sdise.github.io/projects/cf-b2-worker/>
+- **cf-b2-worker** — Cloudflare Workers ⇄ Backblaze B2 一体化网关：自带 AWS SigV4 实现与网页文件管理器，读写闭环、预签名直传、分片上传；匿名只读 `/share/` 公开目录、下载强制经 Worker；CF 与 B2 同属带宽联盟，回源与出网双向免流量费。
+  项目页 <https://sdise.github.io/projects/cf-b2-worker/> ｜ 在线预览 <https://b2.edgeoneai.cc.cd/share/> ｜ 源码 <https://github.com/sdise/cf-b2>
 - **cf-vpngate** — 前端 VLESS over WebSocket / XHTTP，后端可走 SSTP（VPN Gate 公共节点）、ProxyIP、socks5、http(s) 或 TXT 记录随机落地；SSTP 分支在 Worker 内完成 PPP 协商并手工封装 IPv4/TCP。
   <https://sdise.github.io/projects/cf-vpngate/>
 - **vpngate** — VPNGate 节点自动采集与订阅生成：每小时从官方 API 增量入库，每天用 xray 内核逐条实测连通性，只把实测有效的节点输出成 v2rayN / Clash 两种订阅。
