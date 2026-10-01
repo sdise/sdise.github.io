@@ -34,6 +34,9 @@
 - **cf-b2** — Cloudflare Workers ⇄ Backblaze B2 一体化网关：单文件、零依赖，自带 AWS Signature V4 实现和网页文件管理器
   <https://github.com/sdise/cf-b2>
 
+- **js-store** — 自用脚本合集
+  <https://github.com/sdise/js-store>
+
 ## 网络测速仪
 
 <https://sdise.github.io/speed.html>
